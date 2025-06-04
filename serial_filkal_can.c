@@ -223,7 +223,7 @@ while (!feof(nf) && line_count < count) {
            }
            ///sprintf(logdata,"CTE:%.2f, estCTE:%.2f, disAC:%.2f deltaAng:%.2f \n",cte_ab,prev_cte,dis_ac,diffang_h);
            //canbus = pidHead(diffang_h,(-5*cte_ab),100.0,0.0,0.0);
-           canbus = pidHead(diffang_h,3*prdstpt,100.0,0.0,10.0);
+           canbus = pidHead(diffang_h,2*prdstpt,100.0,0.0,10.0);
 	   //printf("CTE:%.2f predst: %.2f setpt:%.2f %d\n",cte_ab,3*prdstpt,(-5*cte_ab),line_count); 
 	   sprintf(message,"%d\r\n",canbus);
 	   bytes_written = write(fds,message, sizeof(message));
@@ -231,7 +231,7 @@ while (!feof(nf) && line_count < count) {
         	perror("Error writing to serial port");
         	close(fds);
     		}
-           sprintf(logdata,"CTE:%.2f, estCTE:%.2f, disAC:%.2f deltaAng:%.2f \n",cte_ab,prev_cte,dis_ac,diffang_h);
+           sprintf(logdata,"CTE:%.2f, estCTE:%.2f, disAC:%.2f deltaAng:%.2f num:%d canbus:%d\n",cte_ab,prev_cte,dis_ac,diffang_h,line_count,canbus);
            printf("%s ",logdata); 
            ssize_t logbyte = write(lgfds,logdata,strlen(logdata));
              if(logbyte == -1){

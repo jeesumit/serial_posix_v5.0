@@ -400,9 +400,9 @@ class Path_plan:
                     if int(self.angle(middle_pt[0],middle_pt[1])[0])==int(long_bearing):
                         #trakk.append(middle_pt)
                         #trakk.append([head_a,head_b])
-                       dist_Ab = self.distancebet(head_a, head_b)
-                       points_added = self.track(head_a,head_b,dist_Ab/3)
-                       trakk.append(points_added[0])
+                        dist_Ab = self.distancebet(head_a, head_b)
+                        points_added = self.track(head_a,head_b,dist_Ab)
+                        trakk.append(points_added[0])
 
             except IndexError:
                 pi=pi+1
