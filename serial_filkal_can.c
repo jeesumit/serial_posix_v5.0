@@ -75,6 +75,14 @@ ssize_t bytes_written;
 int fd, res;
 FILE * nf;
 unsigned int *bn;
+/*--------------------LOG FILE INIT___________________________________________*/
+const char logfile[] = "inc/log.buf";
+char logdata[256];
+int lgfds = open(logfile,O_WRONLY | O_CREAT | O_TRUNC, 0666);
+if(lgfds == -1){
+perror("openERROR -- LOG");
+}
+
 /*------------------- Intialize GNSS FILE-------------------------------------*/
 const char *filename = "inc/gnr.buf";
 ssize_t bytes_read;
@@ -174,7 +182,7 @@ while (!feof(nf) && line_count < count) {
 	  
 	   double diff = distance(lat,lat_p,lng,lon_p);
 	   dis_ab = distance(lat_pa,lat_pb,lon_pa,lon_pb);
-	   printf("Dist:%.2f  %.2f\n",diff,dis_ab);
+	   //printf("Dist:%.2f  %.2f\n",diff,dis_ab);
 	   
 	   /*----------------------logic starts here---------------------------------------*/
 	   ang_ab=initial_bearing(lat_pa,lat_pb,lon_pa,lon_pb);
@@ -213,17 +221,23 @@ while (!feof(nf) && line_count < count) {
            prev_cte = -1*0.6154*cte_ab;
            prdstpt =ConvertRadtoDeg(asin(prev_cte / dis_ac));
            }
-
+           ///sprintf(logdata,"CTE:%.2f, estCTE:%.2f, disAC:%.2f deltaAng:%.2f \n",cte_ab,prev_cte,dis_ac,diffang_h);
            //canbus = pidHead(diffang_h,(-5*cte_ab),100.0,0.0,0.0);
-           canbus = pidHead(diffang_h,2*prdstpt,100.0,0.0,10.0);
-	   printf("CTE:%.2f predst: %.2f setpt:%.2f %d\n",cte_ab,prdstpt,(-5*cte_ab),line_count); 
+           canbus = pidHead(diffang_h,3*prdstpt,100.0,0.0,10.0);
+	   //printf("CTE:%.2f predst: %.2f setpt:%.2f %d\n",cte_ab,3*prdstpt,(-5*cte_ab),line_count); 
 	   sprintf(message,"%d\r\n",canbus);
 	   bytes_written = write(fds,message, sizeof(message));
      	   if (bytes_written == -1) {
         	perror("Error writing to serial port");
         	close(fds);
-    		} 
-	    
+    		}
+           sprintf(logdata,"CTE:%.2f, estCTE:%.2f, disAC:%.2f deltaAng:%.2f \n",cte_ab,prev_cte,dis_ac,diffang_h);
+           printf("%s ",logdata); 
+           ssize_t logbyte = write(lgfds,logdata,strlen(logdata));
+             if(logbyte == -1){
+                 perror("ERROR -- log");
+                  close(lgfds);
+               }
 	   if(diff <5.0 && diff > 0.0){
 		fgets(line, 255, nf);
 		line_count++;
@@ -252,6 +266,11 @@ while (!feof(nf) && line_count < count) {
     }
 	
 }
+if(close(lgfds) == -1){
+perror("Error closing logfile");
+exit(EXIT_FAILURE);
+}
+
 fclose(nf);
 close(fds);
 return 0;

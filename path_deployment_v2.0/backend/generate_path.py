@@ -11,7 +11,7 @@ class Path_plan:
         
     def path(self):
 
-        tp= self.path_planning(self.gcp, 2.8,4,2.2)
+        tp= self.path_planning(self.gcp, 2.0,3.6,2.2)
         self.save_path(tp)
         return tp
 
